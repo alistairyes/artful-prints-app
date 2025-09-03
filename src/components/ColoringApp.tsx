@@ -10,13 +10,18 @@ import CheckoutStep from "./steps/CheckoutStep";
 
 export type AppStep = "upload" | "style" | "preview" | "print" | "checkout" | "complete";
 
+export interface PrintItem {
+  sizeId: string;
+  quantity: number;
+  price: number;
+}
+
 export interface OrderData {
   originalImage?: File;
   coloredImage?: string;
   selectedStyle?: string;
-  printSize?: string;
-  quantity?: number;
-  price?: number;
+  printItems?: PrintItem[];
+  totalPrice?: number;
   shippingInfo?: {
     name: string;
     email: string;

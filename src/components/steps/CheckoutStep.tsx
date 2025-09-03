@@ -13,6 +13,12 @@ interface CheckoutStepProps {
   orderData: OrderData;
 }
 
+interface PrintItem {
+  sizeId: string;
+  quantity: number;
+  price: number;
+}
+
 const CheckoutStep = ({ onComplete, onBack, orderData }: CheckoutStepProps) => {
   const [shippingInfo, setShippingInfo] = useState({
     name: orderData.shippingInfo?.name || "",

@@ -42,6 +42,12 @@ const printSizes = [
   },
 ];
 
+interface PrintItem {
+  sizeId: string;
+  quantity: number;
+  price: number;
+}
+
 const PrintStep = ({ onComplete, onBack, orderData }: PrintStepProps) => {
   const [selectedSize, setSelectedSize] = useState<string>(orderData.printSize || "");
   const [quantity, setQuantity] = useState<number>(orderData.quantity || 1);
