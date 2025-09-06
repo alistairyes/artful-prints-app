@@ -140,9 +140,15 @@ const AuthPage = () => {
       if (error) {
         throw error;
       }
+      
+      // Success message will be shown after redirect
+      toast({
+        title: `${isLogin ? 'Signing in' : 'Creating account'} with Google...`,
+        description: "Redirecting to Google for authentication.",
+      });
     } catch (error: any) {
       toast({
-        title: "Google sign in failed",
+        title: `Google ${isLogin ? 'sign in' : 'sign up'} failed`,
         description: error.message,
         variant: "destructive",
       });
@@ -163,9 +169,15 @@ const AuthPage = () => {
       if (error) {
         throw error;
       }
+      
+      // Success message will be shown after redirect
+      toast({
+        title: `${isLogin ? 'Signing in' : 'Creating account'} with Facebook...`,
+        description: "Redirecting to Facebook for authentication.",
+      });
     } catch (error: any) {
       toast({
-        title: "Facebook sign in failed",
+        title: `Facebook ${isLogin ? 'sign in' : 'sign up'} failed`,
         description: error.message,
         variant: "destructive",
       });
@@ -189,7 +201,7 @@ const AuthPage = () => {
             </p>
           </div>
 
-          {/* Social Login Options */}
+          {/* Social Login/Signup Options */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -218,7 +230,7 @@ const AuthPage = () => {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-gradient-card px-2 text-muted-foreground">
-                  Or continue with email
+                  Or {isLogin ? "sign in" : "sign up"} with email
                 </span>
               </div>
             </div>
