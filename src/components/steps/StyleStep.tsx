@@ -60,6 +60,10 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
   };
 
   const handleContinue = async () => {
+    console.log("handleContinue called");
+    console.log("selectedStyle:", selectedStyle);
+    console.log("orderData.originalImage:", orderData.originalImage);
+    
     if (!selectedStyle) {
       toast({
         title: "Pick a style!",
@@ -81,6 +85,7 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
     setIsGenerating(true);
 
     try {
+      console.log("Converting image to base64...");
       // Convert image to base64
       const imageData = await new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -88,11 +93,15 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
         reader.readAsDataURL(orderData.originalImage!);
       });
 
+      console.log("Image converted, imageData length:", imageData.length);
+
       toast({
         title: "Creating magic! ✨",
         description: "Our AI is coloring your drawing...",
       });
 
+      console.log("Calling edge function with:", { selectedStyle, imageDataLength: imageData.length });
+      
       // Call the edge function
       const { data, error } = await supabase.functions.invoke('generate-colored-image', {
         body: {
@@ -100,6 +109,8 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
           selectedStyle
         }
       });
+
+      console.log("Edge function response:", { data, error });
 
       if (error) {
         if (error.status === 401) {
