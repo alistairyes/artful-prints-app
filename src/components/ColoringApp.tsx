@@ -21,7 +21,12 @@ export interface OrderData {
   coloredImage?: string;
   selectedStyle?: string;
   printItems?: PrintItem[];
+  printSize?: string;
+  quantity?: number;
+  price?: number;
   totalPrice?: number;
+  generationAttempts?: number;
+  productType?: 'frame' | 'mug' | 'tshirt' | 'thermos';
   shippingInfo?: {
     name: string;
     email: string;
