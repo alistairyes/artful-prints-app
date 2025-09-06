@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ArrowLeft, Sparkles, Brush, Palette } from "lucide-react";
+import { ArrowLeft, Sparkles, Brush, Palette, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import type { AppStep, OrderData } from "../ColoringApp";
 
 interface StyleStepProps {
@@ -51,12 +52,14 @@ const coloringStyles = [
 
 const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
   const [selectedStyle, setSelectedStyle] = useState<string>(orderData.selectedStyle || "");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationAttempts, setGenerationAttempts] = useState(orderData.generationAttempts || 0);
 
   const handleStyleSelect = (styleId: string) => {
     setSelectedStyle(styleId);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!selectedStyle) {
       toast({
         title: "Pick a style!",
@@ -66,16 +69,78 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
       return;
     }
 
-    // Simulate AI coloring process
-    toast({
-      title: "Creating magic! ✨",
-      description: "Our AI is coloring your drawing...",
-    });
+    if (!orderData.originalImage) {
+      toast({
+        title: "No image found",
+        description: "Please go back and upload an image first",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // In a real app, this would call an AI API
-    setTimeout(() => {
-      onComplete("style", { selectedStyle });
-    }, 2000);
+    setIsGenerating(true);
+
+    try {
+      // Convert image to base64
+      const imageData = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(orderData.originalImage!);
+      });
+
+      toast({
+        title: "Creating magic! ✨",
+        description: "Our AI is coloring your drawing...",
+      });
+
+      // Call the edge function
+      const { data, error } = await supabase.functions.invoke('generate-colored-image', {
+        body: {
+          imageData,
+          selectedStyle
+        }
+      });
+
+      if (error) {
+        if (error.status === 402) {
+          toast({
+            title: "Need more credits! 💰",
+            description: "You've used all free generations. Purchase credits to continue.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
+
+      if (!data.coloredImageUrl) {
+        throw new Error("No image returned from AI");
+      }
+
+      toast({
+        title: "Magic complete! 🎨",
+        description: "Your drawing has been beautifully colored!",
+      });
+
+      const newAttempts = generationAttempts + 1;
+      setGenerationAttempts(newAttempts);
+      
+      onComplete("style", { 
+        selectedStyle, 
+        coloredImage: data.coloredImageUrl,
+        generationAttempts: newAttempts
+      });
+
+    } catch (error) {
+      console.error("Generation error:", error);
+      toast({
+        title: "Oops! Something went wrong",
+        description: "Please try again or contact support if the problem persists",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -131,7 +196,7 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
         ))}
       </div>
 
-      {selectedStyle && (
+      {selectedStyle && !isGenerating && (
         <Button
           variant="fun"
           size="lg"
@@ -141,6 +206,28 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
           <Brush className="w-5 h-5" />
           Start Coloring Magic!
         </Button>
+      )}
+
+      {isGenerating && (
+        <Button
+          variant="fun"
+          size="lg"
+          className="w-full"
+          disabled
+        >
+          <Zap className="w-5 h-5 animate-pulse" />
+          Creating Magic... Please Wait
+        </Button>
+      )}
+
+      {/* Generation Attempts Counter */}
+      {generationAttempts > 0 && (
+        <Card className="p-3 bg-muted/50 border-0">
+          <p className="text-xs text-muted-foreground text-center">
+            🎨 Generations used: {generationAttempts}/3 free
+            {generationAttempts >= 3 && " (Additional generations require credits)"}
+          </p>
+        </Card>
       )}
 
       {/* Preview Note */}

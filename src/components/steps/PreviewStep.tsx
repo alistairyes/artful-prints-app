@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { ArrowLeft, Eye, EyeOff, RotateCcw } from "lucide-react";
+import { ArrowLeft, Eye, RotateCcw, CheckCircle, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
+import ProductMockup from "@/components/ProductMockup";
 import type { AppStep, OrderData } from "../ColoringApp";
 
 interface PreviewStepProps {
@@ -13,28 +14,29 @@ interface PreviewStepProps {
 
 const PreviewStep = ({ onComplete, onBack, orderData }: PreviewStepProps) => {
   const [showOriginal, setShowOriginal] = useState(false);
-  
-  // In a real app, this would be the AI-colored image URL
-  const coloredImageUrl = "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=400&fit=crop&crop=center";
-  const originalImageUrl = orderData.originalImage ? URL.createObjectURL(orderData.originalImage) : "";
+  const [selectedProduct, setSelectedProduct] = useState<'frame' | 'mug' | 'tshirt' | 'thermos'>(orderData.productType || 'frame');
 
   const handleApprove = () => {
     toast({
-      title: "Perfect choice! 🎨",
-      description: "Your colored drawing looks amazing!",
+      title: "Perfect choice! 🎉",
+      description: "Your colored artwork looks amazing!",
     });
     
     onComplete("preview", { 
-      coloredImage: coloredImageUrl 
+      productType: selectedProduct 
     });
   };
 
   const handleTryAgain = () => {
     toast({
-      title: "No problem!",
-      description: "Let's try a different style",
+      title: "Let's try another style! 🎨",
+      description: "Going back to style selection...",
     });
     onBack();
+  };
+
+  const handleProductSelect = (product: 'frame' | 'mug' | 'tshirt' | 'thermos') => {
+    setSelectedProduct(product);
   };
 
   const toggleView = () => {
@@ -56,7 +58,7 @@ const PreviewStep = ({ onComplete, onBack, orderData }: PreviewStepProps) => {
 
       <div className="text-center space-y-2">
         <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto shadow-glow">
-          <Eye className="w-8 h-8 text-white" />
+          <Palette className="w-8 h-8 text-white" />
         </div>
         <h2 className="text-xl font-bold text-foreground">Your Colored Drawing!</h2>
         <p className="text-muted-foreground text-sm">
@@ -67,80 +69,81 @@ const PreviewStep = ({ onComplete, onBack, orderData }: PreviewStepProps) => {
       {/* Image Preview */}
       <Card className="p-4 bg-gradient-card border-0 shadow-card">
         <div className="space-y-4">
-          <div className="flex justify-center">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold">Your Artwork</h3>
             <Button
               variant="soft"
               size="sm"
               onClick={toggleView}
-              className="transition-all duration-300"
+              className="text-xs"
             >
-              {showOriginal ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <Eye className="w-4 h-4" />
               {showOriginal ? "Show Colored" : "Show Original"}
             </Button>
           </div>
           
-          <div className="aspect-square bg-white rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/20 relative">
+          <div className="relative">
             <img
-              src={showOriginal ? originalImageUrl : coloredImageUrl}
-              alt={showOriginal ? "Original drawing" : "Colored drawing"}
-              className="w-full h-full object-contain transition-all duration-500"
+              src={showOriginal 
+                ? (orderData.originalImage ? URL.createObjectURL(orderData.originalImage) : "")
+                : (orderData.coloredImage || "")
+              }
+              alt={showOriginal ? "Original drawing" : "Colored artwork"}
+              className="w-full h-auto rounded-lg shadow-fun max-h-64 object-contain mx-auto block"
             />
             
-            {/* Overlay label */}
-            <div className="absolute top-2 left-2">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                showOriginal 
-                  ? "bg-muted text-muted-foreground" 
-                  : "bg-gradient-primary text-white shadow-fun"
-              }`}>
-                {showOriginal ? "Original" : "AI Colored"}
-              </span>
+            <div className="absolute top-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+              {showOriginal ? "Original" : "Colored"}
             </div>
           </div>
-
-          {/* Style Info */}
+          
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
-              Style: <span className="font-semibold text-foreground capitalize">
-                {orderData.selectedStyle?.replace('-', ' ')}
-              </span>
+              Style: <span className="font-semibold text-primary capitalize">{orderData.selectedStyle}</span>
             </p>
           </div>
         </div>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        <Button
-          variant="fun"
-          size="lg"
-          className="w-full"
-          onClick={handleApprove}
-        >
-          I Love It! Let's Print 🖨️
-        </Button>
-        
-        <Button
-          variant="soft"
-          size="lg"
-          className="w-full"
-          onClick={handleTryAgain}
-        >
-          <RotateCcw className="w-4 h-4" />
-          Try Different Style
-        </Button>
-      </div>
+      {/* Product Mockup */}
+      {orderData.coloredImage && (
+        <ProductMockup
+          coloredImage={orderData.coloredImage}
+          selectedProduct={selectedProduct}
+          onProductSelect={handleProductSelect}
+        />
+      )}
 
-      {/* Quality Note */}
-      <Card className="p-4 bg-muted/50 border-0">
-        <div className="space-y-2">
-          <h4 className="font-semibold text-sm flex items-center gap-2">
-            ✨ AI Magic Complete!
-          </h4>
-          <p className="text-xs text-muted-foreground">
-            Your drawing has been enhanced with beautiful colors while keeping all the original details.
-          </p>
+      {/* Action Buttons */}
+      {orderData.coloredImage && (
+        <div className="space-y-3">
+          <Button
+            variant="soft"
+            size="lg"
+            className="w-full"
+            onClick={handleTryAgain}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Try Different Style
+          </Button>
+          
+          <Button
+            variant="fun"
+            size="lg"
+            className="flex-1"
+            onClick={handleApprove}
+          >
+            <CheckCircle className="w-5 h-5" />
+            Perfect! Let's Print
+          </Button>
         </div>
+      )}
+
+      {/* Credits Info */}
+      <Card className="p-4 bg-muted/50 border-0">
+        <p className="text-xs text-muted-foreground text-center">
+          🎯 Free generations: {3 - (orderData.generationAttempts || 0)} remaining
+        </p>
       </Card>
     </div>
   );
