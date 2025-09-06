@@ -14,7 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      generation_attempts: {
+        Row: {
+          cost: number | null
+          created_at: string
+          generated_image_url: string | null
+          id: string
+          is_free_attempt: boolean | null
+          original_image_url: string | null
+          prompt_used: string | null
+          selected_style: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          generated_image_url?: string | null
+          id?: string
+          is_free_attempt?: boolean | null
+          original_image_url?: string | null
+          prompt_used?: string | null
+          selected_style?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          generated_image_url?: string | null
+          id?: string
+          is_free_attempt?: boolean | null
+          original_image_url?: string | null
+          prompt_used?: string | null
+          selected_style?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          colored_image_url: string | null
+          created_at: string
+          id: string
+          original_image_url: string | null
+          price: number | null
+          print_size: string | null
+          product_type: string | null
+          quantity: number | null
+          selected_style: string | null
+          shipping_info: Json | null
+          status: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          colored_image_url?: string | null
+          created_at?: string
+          id?: string
+          original_image_url?: string | null
+          price?: number | null
+          print_size?: string | null
+          product_type?: string | null
+          quantity?: number | null
+          selected_style?: string | null
+          shipping_info?: Json | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          colored_image_url?: string | null
+          created_at?: string
+          id?: string
+          original_image_url?: string | null
+          price?: number | null
+          print_size?: string | null
+          product_type?: string | null
+          quantity?: number | null
+          selected_style?: string | null
+          shipping_info?: Json | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          created_at: string
+          free_generations_remaining: number | null
+          id: string
+          paid_credits: number | null
+          total_generations: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          free_generations_remaining?: number | null
+          id?: string
+          paid_credits?: number | null
+          total_generations?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          free_generations_remaining?: number | null
+          id?: string
+          paid_credits?: number | null
+          total_generations?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
