@@ -102,6 +102,14 @@ const StyleStep = ({ onComplete, onBack, orderData }: StyleStepProps) => {
       });
 
       if (error) {
+        if (error.status === 401) {
+          toast({
+            title: "Authentication required",
+            description: "Please sign in to use the coloring feature",
+            variant: "destructive",
+          });
+          return;
+        }
         if (error.status === 402) {
           toast({
             title: "Need more credits! 💰",
