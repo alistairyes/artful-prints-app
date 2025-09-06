@@ -106,23 +106,23 @@ serve(async (req) => {
       throw new Error("Failed to create generation attempt");
     }
 
-    // Use OpenAI image generation for actual image processing
-    const prompt = `${stylePrompt} Create a beautiful colored version of this uploaded drawing/coloring page.`;
+    // Convert base64 image data to blob for OpenAI
+    const base64Data = imageData.split(',')[1]; // Remove data:image/png;base64, prefix
+    const imageBlob = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
     
-    const openAIResponse = await fetch("https://api.openai.com/v1/images/generations", {
+    // Create form data for OpenAI image editing
+    const formData = new FormData();
+    formData.append('image', new Blob([imageBlob], { type: 'image/png' }), 'image.png');
+    formData.append('prompt', `${stylePrompt} Color this line drawing beautifully.`);
+    formData.append('n', '1');
+    formData.append('size', '1024x1024');
+
+    const openAIResponse = await fetch("https://api.openai.com/v1/images/edits", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
-        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "gpt-image-1",
-        prompt: prompt,
-        n: 1,
-        size: "1024x1024",
-        quality: "high",
-        output_format: "png"
-      })
+      body: formData
     });
 
     if (!openAIResponse.ok) {
